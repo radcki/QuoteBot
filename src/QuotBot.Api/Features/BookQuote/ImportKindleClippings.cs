@@ -14,7 +14,7 @@ namespace QuotBot.Api.Features.BookQuote
             public int AddedCount { get; init; }
         }
 
-        public class Endpoint(IDatabaseContext databaseContext, KindleClippingQuoteParser kindleClippingQuoteParser) : EndpointWithoutRequest<Result>
+        public class Endpoint(IDatabaseContext databaseContext, KindleClippingQuoteParser kindleClippingQuoteParser, ILogger<ImportKindleClippings> logger) : EndpointWithoutRequest<Result>
         {
             public override void Configure()
             {
@@ -29,6 +29,7 @@ namespace QuotBot.Api.Features.BookQuote
             {
                 var addedCount = 0;
                 var existingQuotes = await databaseContext.BookQuotes.ToListAsync(cancellationToken: ct);
+                logger.LogInformation($"Uploaded files count: {Files.Count}");
                 foreach (var file in Files)
                 {
                     var input = await file.ReadAsStringAsync(ct);
