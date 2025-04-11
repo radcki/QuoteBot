@@ -7,8 +7,7 @@ namespace QuotBot.Api.Features.BookQuote
 {
     public abstract class ReadBookQuotes
     {
-
-
+        
         public class Endpoint(IDatabaseContext databaseContext) : EndpointWithoutRequest<IEnumerable<BookQuoteDto>>
         {
             public override void Configure()

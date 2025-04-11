@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using QuotBot.Api.Features.BookQuote.Dto;
 using QuotBot.Core.Data;
+using QuotBot.Core.Services.PushoverPublisher;
 
 namespace QuotBot.Api.Features.BookQuote
 {
@@ -30,7 +31,7 @@ namespace QuotBot.Api.Features.BookQuote
                                                                           })
                                                   .Skip(offset)
                                                   .FirstOrDefaultAsync(cancellationToken: ct);
-
+   
                 await SendAsync(result, cancellation: ct);
             }
         }
