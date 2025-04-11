@@ -20,7 +20,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\QuoteBot.Core\QuotBot.Core.csproj" />
+    <ProjectReference Include="..\QuotBot.Core\QuotBot.Core.csproj" />
   </ItemGroup>
 
 </Project>

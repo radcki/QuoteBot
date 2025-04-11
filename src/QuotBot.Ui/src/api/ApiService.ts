@@ -1,7 +1,7 @@
 import axios from "axios";
 
 class ApiService {
-  private baseUrl = `${import.meta.env.VITE_APIURL}/`;
+  private baseUrl = `${import.meta.env.VITE_APIURL || "/api"}/`;
   private userManager: any = null;
 
   async get<T = any>(url: string, query?: any) {
@@ -31,6 +31,39 @@ class ApiService {
 
   async patch<T = any>(url: string, data: any) {
     return await axios.patch<T>(this.baseUrl + url, data || {});
+  }
+
+  async postMultipart<T = any>(resource: string, data: any) {
+    const formData = new FormData();
+    Object.keys(data)
+      .filter((property) => !!data[property])
+      .forEach((property) => {
+        const propertyValue = Reflect.get(data, property);
+        if (Array.isArray(propertyValue)) {
+          formData.append(property, this.propertyToString(propertyValue));
+          let i = 0;
+          for (const item of propertyValue) {
+            formData.append(`${property}[${i}]`, this.propertyToString(item));
+            i++;
+          }
+        } else if (propertyValue instanceof File) {
+          formData.append(property, propertyValue);
+        } else {
+          formData.append(property, this.propertyToString(propertyValue));
+        }
+      });
+    return axios.post<T>(resource, formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+      baseURL: this.baseUrl,
+    });
+  }
+
+  private propertyToString(property: any): string {
+    if (property instanceof Date) return property.toJSON();
+    if (property.toString) return property.toString();
+    return property;
   }
 
   private ToString(value: any) {

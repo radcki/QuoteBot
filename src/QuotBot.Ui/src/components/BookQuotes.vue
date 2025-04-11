@@ -7,6 +7,8 @@ const allQuotes = ref<BookQuoteDto[]>([] as BookQuoteDto[]);
 const randomQuote = ref<BookQuoteDto>();
 const loadDataLoading = ref<boolean>(false);
 const randomQuoteLoading = ref<boolean>(false);
+const uploadKindleClippingsLoading = ref<boolean>(false);
+const clippingsInputFile = ref<File>();
 
 const loadData = async () => {
   try {
@@ -30,6 +32,19 @@ const loadRandomQuote = async () => {
     randomQuoteLoading.value = false;
   }
 };
+const uploadKindleClippings = async () => {
+  try {
+    uploadKindleClippingsLoading.value = true;
+    if (clippingsInputFile.value) {
+      await BookQuoteService.uploadKindleClippings(clippingsInputFile.value);
+    }
+    loadData();
+  } catch (e) {
+    console.error(e);
+  } finally {
+    uploadKindleClippingsLoading.value = false;
+  }
+};
 onMounted(() => {
   loadRandomQuote();
 });
@@ -38,6 +53,28 @@ onMounted(() => {
 <template>
   <v-row class="ma-5">
     <v-col :cols="12">
+      <div class="d-flex pa-2">
+        <div class="d-flex flex-grow-0">
+          <v-file-input
+            v-model="clippingsInputFile"
+            accept=".txt"
+            width="300"
+            label="Upload kindle clippings"
+          />
+        </div>
+        <div class="pa-2">
+          <v-btn
+            variant="text"
+            :disabled="!clippingsInputFile"
+            :loading="uploadKindleClippingsLoading"
+            icon
+            color="primary"
+            @click="uploadKindleClippings()"
+          >
+            <v-icon>mdi-upload</v-icon>
+          </v-btn>
+        </div>
+      </div>
       <div class="d-flex justify-end pa-2">
         <v-btn
           variant="text"

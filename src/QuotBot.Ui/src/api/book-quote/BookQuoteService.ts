@@ -20,6 +20,10 @@ class BookQuoteService {
     const url = this.baseUrl + quote.bookQuoteId + "/send-as-notification/";
     return (await api.post<void>(url, {})).data;
   }
+  async uploadKindleClippings(inputFile: File): Promise<void> {
+    const url = this.baseUrl + "import-kindle-clippings/";
+    return (await api.postMultipart<void>(url, { inputFile })).data;
+  }
 }
 
 export default new BookQuoteService();

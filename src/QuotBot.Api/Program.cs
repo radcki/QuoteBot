@@ -41,7 +41,9 @@ namespace QuotBot.Api
 
             builder.Services.AddTransient<PushoverPublisherService>();
             builder.Services.AddOpenApi();
-            builder.Services.AddDbContext<IDatabaseContext, DatabaseContext>(options => options.UseSqlite("Data Source=db.dat"));
+
+            var dbFilePath = Path.Combine(configuration.GetValue<string>("DataPath") ?? "", "data.db");
+            builder.Services.AddDbContext<IDatabaseContext, DatabaseContext>(options => options.UseSqlite($"Data Source={dbFilePath}"));
 
             builder.Services.AddCors(options =>
                                      {
@@ -76,7 +78,8 @@ namespace QuotBot.Api
             app.UseCors();
             app.UseAuthorization();
             app.Services.GetRequiredService<JobRegistry>().RegisterJobs();
-
+            app.UseDefaultFiles();
+            app.UseStaticFiles();
             app.Run();
         }
     }
