@@ -7,6 +7,7 @@ const allQuotes = ref<BookQuoteDto[]>([] as BookQuoteDto[]);
 const randomQuote = ref<BookQuoteDto>();
 const loadDataLoading = ref<boolean>(false);
 const randomQuoteLoading = ref<boolean>(false);
+const deleteAllQuotesLoading = ref<boolean>(false);
 const uploadKindleClippingsLoading = ref<boolean>(false);
 const clippingsInputFile = ref<File>();
 
@@ -32,24 +33,32 @@ const loadRandomQuote = async () => {
     randomQuoteLoading.value = false;
   }
 };
+const deleteAllQuotes = async () => {
+  try {
+    deleteAllQuotesLoading.value = true;
+    await BookQuoteService.deleteAll();
+    loadData();
+  } catch (e) {
+    console.error(e);
+  } finally {
+    deleteAllQuotesLoading.value = false;
+  }
+};
 const uploadKindleClippings = async () => {
   try {
     uploadKindleClippingsLoading.value = true;
     if (clippingsInputFile.value) {
       const reader = new FileReader();
-      reader.onload = function () {
+      reader.onload = () => {
         const clippingsText = reader.result as string;
         BookQuoteService.uploadKindleClippingsAsString(clippingsText).then(
-          function () {
+          () => {
             loadData();
           }
         );
       };
       reader.readAsText(clippingsInputFile.value);
-
-      // await BookQuoteService.uploadKindleClippings(clippingsInputFile.value);
     }
-    // loadData();
   } catch (e) {
     console.error(e);
   } finally {
@@ -88,11 +97,10 @@ onMounted(() => {
         <div class="pa-2">
           <v-btn
             variant="text"
-            :disabled="!clippingsInputFile"
-            :loading="uploadKindleClippingsLoading"
+            :loading="deleteAllQuotesLoading"
             icon
             color="error"
-            @click="uploadKindleClippings()"
+            @click="deleteAllQuotes()"
           >
             <v-icon>mdi-delete-alert</v-icon>
           </v-btn>
