@@ -36,9 +36,20 @@ const uploadKindleClippings = async () => {
   try {
     uploadKindleClippingsLoading.value = true;
     if (clippingsInputFile.value) {
-      await BookQuoteService.uploadKindleClippings(clippingsInputFile.value);
+      const reader = new FileReader();
+      reader.onload = function () {
+        const clippingsText = reader.result as string;
+        BookQuoteService.uploadKindleClippingsAsString(clippingsText).then(
+          function () {
+            loadData();
+          }
+        );
+      };
+      reader.readAsText(clippingsInputFile.value);
+
+      // await BookQuoteService.uploadKindleClippings(clippingsInputFile.value);
     }
-    loadData();
+    // loadData();
   } catch (e) {
     console.error(e);
   } finally {
@@ -72,6 +83,18 @@ onMounted(() => {
             @click="uploadKindleClippings()"
           >
             <v-icon>mdi-upload</v-icon>
+          </v-btn>
+        </div>
+        <div class="pa-2">
+          <v-btn
+            variant="text"
+            :disabled="!clippingsInputFile"
+            :loading="uploadKindleClippingsLoading"
+            icon
+            color="error"
+            @click="uploadKindleClippings()"
+          >
+            <v-icon>mdi-delete-alert</v-icon>
           </v-btn>
         </div>
       </div>

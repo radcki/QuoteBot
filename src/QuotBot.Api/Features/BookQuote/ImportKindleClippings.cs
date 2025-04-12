@@ -9,53 +9,63 @@ namespace QuotBot.Api.Features.BookQuote
 {
     public abstract class ImportKindleClippings
     {
+        public class Request
+        {
+            public string? Clippings { get; set; } = null;
+        }
+
         public class Result
         {
             public int AddedCount { get; init; }
         }
 
-        public class Endpoint(IDatabaseContext databaseContext, KindleClippingQuoteParser kindleClippingQuoteParser, ILogger<ImportKindleClippings> logger) : EndpointWithoutRequest<Result>
+        public class Endpoint(IDatabaseContext databaseContext, KindleClippingQuoteParser kindleClippingQuoteParser, ILogger<ImportKindleClippings> logger) : Endpoint<Request, Result>
         {
             public override void Configure()
             {
                 Post("/api/quote/import-kindle-clippings");
-
-                AllowFileUploads();
+                
                 AllowAnonymous();
             }
 
 
-            public override async Task HandleAsync(CancellationToken ct)
+            public override async Task HandleAsync(Request req, CancellationToken ct)
             {
-                var addedCount = 0;
                 var existingQuotes = await databaseContext.BookQuotes.ToListAsync(cancellationToken: ct);
-                logger.LogInformation($"Uploaded files count: {Files.Count}");
-                foreach (var file in Files)
+                List<Core.Model.BookQuote> newBookQuotes = [];
+    
+                if (!string.IsNullOrWhiteSpace(req.Clippings))
                 {
-                    var input = await file.ReadAsStringAsync(ct);
+                    newBookQuotes.AddRange(GetNewQuotes(req.Clippings, existingQuotes));
+                }
 
-                    foreach (var bookQuote in kindleClippingQuoteParser.ParseQuotes(input))
-                    {
-                        var quoteAdded = existingQuotes.Any(x => x.Content == bookQuote.Content && x.BookTitle == bookQuote.BookTitle);
-                        if (quoteAdded)
-                        {
-                            continue;
-                        }
-
-                        databaseContext.BookQuotes.Add(bookQuote);
-                        addedCount++;
-                    }
-
-                    if (addedCount > 0)
-                    {
-                        await databaseContext.SaveChangesAsync(ct);
-                    }
+                if (newBookQuotes.Count > 0)
+                {
+                    databaseContext.BookQuotes.AddRange(newBookQuotes);
+                    await databaseContext.SaveChangesAsync(ct);
                 }
 
                 await SendAsync(new()
                                 {
-                                    AddedCount = addedCount
+                                    AddedCount = newBookQuotes.Count
                                 }, cancellation: ct);
+            }
+
+            private IEnumerable<Core.Model.BookQuote> GetNewQuotes(string input, List<Core.Model.BookQuote> existingQuotes)
+            {
+                var addedCount = 0;
+                foreach (var bookQuote in kindleClippingQuoteParser.ParseQuotes(input))
+                {
+                    var quoteAdded = existingQuotes.Any(x => x.Content == bookQuote.Content && x.BookTitle == bookQuote.BookTitle);
+                    if (quoteAdded)
+                    {
+                        continue;
+                    }
+
+                    yield return bookQuote;
+
+                    databaseContext.BookQuotes.Add(bookQuote);
+                }
             }
         }
     }

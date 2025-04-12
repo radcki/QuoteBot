@@ -1,0 +1,13 @@
+{
+    "minVersion": 1,
+    "manifestVersion": 2,
+    "appVersion": "v0.1.0",
+    "waf": false,
+    "id": "dev.radcki.quotbot",
+    "name": "quotbot",
+    "author": "radcki",
+    "description": "QuotBot kindle client",
+    "repo": "https://github.com/radcki/QuoteBot",
+    "icon": "icon.png",
+    "entrypoint": "index.html"
+}
