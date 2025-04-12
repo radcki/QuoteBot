@@ -1,0 +1,110 @@
+<html>
+
+<head>
+    <meta name="viewport" content="user-scalable=no" />
+    <script src="file:///mnt/us/mesquito/polyfill.min.js"></script>
+    <script src="file:///mnt/us/mesquito/sdk.js"></script>
+    <!-- <script src="./polyfill.min.js"></script> -->
+    <!-- <script src="./sdk.js"></script> -->
+    <script src="./main.js"></script>
+
+    <link href="./main.css" rel="stylesheet">
+
+    <title>QuotBot</title>
+</head>
+
+<body>
+    <h1>Hej! 5</h1>
+    <!-- <input type="file" id="fileInput" /> -->
+    <center>
+        <button onclick="uploadClippings()">Send</button>
+    </center>
+    <br />
+    <div id="log">
+    </div>
+    <script>
+        // var file = null
+        var clippings = ""
+        var baseUrl = "https://quotbot.radad.net/api/quote/"
+        var submitUrl = baseUrl + "import-kindle-clippings"
+        var getRandomUrl = baseUrl + "random"
+
+        function log(dataToLog) {
+            var logEl = document.createElement("p");
+            logEl.innerHTML = dataToLog;
+            document.getElementById("log").appendChild(logEl);
+        }
+        function loadRandomQuote() {
+            log("loadRandomQuote: " + getRandomUrl)
+            fetch(getRandomUrl).then(function (response) {
+                console.log(response)
+                response.json().then(function (json) {
+                    log(JSON.stringify(json))
+                });
+            }).catch(function (e) {
+                log(JSON.stringify(e))
+            });
+
+
+        }
+        function uploadClippings() {
+            // log("uploadClippings: " + submitUrl)
+            try {
+                // file = document.getElementById("fileInput").files[0]
+                // const formData = new FormData();
+                // formData.append("inputFile", file, "MyClippings.txt");
+                // // log(JSON.stringify(formData))
+                // // log("formData created")
+                // log(JSON.stringify(file))
+                log("sending fetch")
+
+                fetch(submitUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ clippings: clippings })
+                }).then(function (response) {
+                    log("response")
+                    log(JSON.stringify(response))
+                    response.json().then(function (json) {
+                        log(JSON.stringify(json))
+                    });
+                }).catch(function (e) {
+                    log(JSON.stringify(e))
+                });
+            } catch (e) {
+                log(JSON.stringify(e))
+            }
+
+        }
+
+        fetchFile("file:///mnt/us/documents/My%20Clippings.txt", timeout = 2000, fixKindleFormatting = true).then(function (clippingsContent) {
+            // fetchFile("./My%20Clippings.txt", timeout = 2000, fixKindleFormatting = true).then(function (clippingsContent) {
+            try {
+                log("Clippings loaded")
+                clippings = clippingsContent
+                // var blob = new Blob([clippingsContent], { type: 'text/plain' });
+                // // blob.name = "MyClippings.txt";
+                // blob.lastModifiedDate = new Date();
+                // file = blob
+                // log("File object created")
+            } catch (e) {
+                log(JSON.stringify(e))
+            }
+        })
+
+        // loadRandomQuote()
+        //     .catch(function (e) {
+        //         log(JSON.stringify(e))
+        //     })
+
+        // getDirectory("file:///mnt/us/documents").then(function (files) {
+        //     log(JSON.stringify(files))
+        // })
+
+    </script>
+</body>
+
+</html>

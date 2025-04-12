@@ -16,6 +16,10 @@ class BookQuoteService {
     const url = this.baseUrl + quote.bookQuoteId;
     return (await api.delete<void>(url)).data;
   }
+  async deleteAll(): Promise<void> {
+    const url = this.baseUrl + "all";
+    return (await api.delete<void>(url)).data;
+  }
   async sendAsNotification(quote: BookQuoteDto): Promise<void> {
     const url = this.baseUrl + quote.bookQuoteId + "/send-as-notification/";
     return (await api.post<void>(url, {})).data;
@@ -23,6 +27,10 @@ class BookQuoteService {
   async uploadKindleClippings(inputFile: File): Promise<void> {
     const url = this.baseUrl + "import-kindle-clippings/";
     return (await api.postMultipart<void>(url, { inputFile })).data;
+  }
+  async uploadKindleClippingsAsString(input: string): Promise<void> {
+    const url = this.baseUrl + "import-kindle-clippings/";
+    return (await api.post<void>(url, { clippings: input })).data;
   }
 }
 
